@@ -1,0 +1,82 @@
+name: Build and run
+
+# Когда он запускается
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Позволяет вручную запускать Workflow
+  workflow_dispatch:
+
+jobs:
+  build_flush:
+    name: Build 01.IO_flush
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cd 01.IO_flush
+          make
+
+      - name: Save build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 01.IO_flush
+          path: ${{ github.workspace }}/01.IO_flush/build
+  experiment_flush:
+    needs:
+        - build_flush
+
+    name: Run experiment on 01.IO_flush
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download last build
+        uses: actions/download-artifact@v4
+        with:
+          name: 01.IO_flush
+          path: ${{ github.workspace }}/01.IO_flush/build
+      - name: Run experiment
+        run: |
+          cd ${{ github.workspace }}/01.IO_flush
+          chmod +x ./build/experiment
+          EXPERIMENT_DIR=experiment_dir bash ./build/run_experiment.sh
+      - name: Save results
+        uses: actions/upload-artifact@v4
+        with:
+          name: 01.IO_flush_experiment_result
+          path: ${{ github.workspace }}/01.IO_flush/experiment_dir
+  build_memory_overcommit:
+    name: Build 02.Memory_Overcommit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cd 02.Memory_Overcommit
+          make
+
+      - name: Save build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 02.Memory_Overcommit
+          path: ${{ github.workspace }}/02.Memory_Overcommit/build

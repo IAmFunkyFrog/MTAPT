@@ -22,7 +22,7 @@ function run_with_args() {
     echo "Done"
 }
 
-if [ -z $EXPERIMENT_DIR]; then
+if [ -z $EXPERIMENT_DIR ]; then
     EXPERIMENT_DIR=experiment
 fi
 
