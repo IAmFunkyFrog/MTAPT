@@ -14,18 +14,25 @@ typedef union {
         unsigned int rs1 : 5;
         int imm : 12;
     } I_type;
-    /*struct {
+    struct {
 
     } S_type;
     struct {
 
     } B_type;
     struct {
-
+        unsigned int opcode : 7;
+        unsigned int rd : 5;
+        int imm : 20;
     } U_type;
     struct {
-
-    } J_type;*/
+        unsigned int opcode : 7;
+        unsigned int rd : 5;
+        unsigned int imm19_12 : 8;
+        unsigned int imm11 : 1;
+        unsigned int imm10_1 : 10;
+        unsigned int imm20 : 1;
+    } J_type;
     struct {
         unsigned int opcode : 7;
         unsigned int unused2 : 5;
@@ -36,9 +43,11 @@ typedef union {
 } rv_instruction;
 
 #define REGISTER_COUNT 32
+#define INSTRUCTION_WIDTH 4
 
 typedef struct {
     int x[REGISTER_COUNT]; // Note: RV32I contain 32 gp registers
+    int pc;
 } rv_cpu;
 
 void rv_dump_cpu(rv_cpu *cpu);
@@ -51,13 +60,16 @@ inline rv_instruction rv_instruction_from_int(int encoding) {
 #define MISSING_FUNCT7 0
 
 #define X_MACRO_INSTRUCTION(F) \
-    F(ADDI, 0b0010011, MISSING_FUNCT3, MISSING_FUNCT7)
+    F(LUI, 0b0110111, MISSING_FUNCT3, MISSING_FUNCT7) \
+    F(AUIPC, 0b0010111, MISSING_FUNCT3, MISSING_FUNCT7) \
+    F(JAL, 0b1101111, MISSING_FUNCT3, MISSING_FUNCT7) \
+    F(ADDI, 0b0010011, 0, MISSING_FUNCT7)
 
 #define STR_CAT(x, y) x ## y
 
-#define ENCODE_INSTR(name, mask, funct3, funct7) \
+#define ENCODE_INSTR(name, opcode, funct3, funct7) \
     typedef enum { \
-        STR_CAT(name, _mask) = mask, \
+        STR_CAT(name, _opcode) = opcode, \
         STR_CAT(name, _funct3) = funct3, \
         STR_CAT(name, _funct7) = funct7, \
     } name;

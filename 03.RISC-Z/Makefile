@@ -18,10 +18,13 @@ main: build_objects
 	$(CC) -c $(SRC)/main.c -o $(BUILD_DIR)/main.o
 	$(CC) $(BUILD_DIR)/*.o $(BUILD_DIR)/lib/*.o -o $(BUILD_DIR)/simulator
 
-test: build_objects
+build_test: build_objects
 	mkdir -p $(BUILD_DIR)/test
 	$(CC) -I$(SRC) $(TEST)/main.c -r -o $(BUILD_DIR)/test/main.o
 	$(CC) $(BUILD_DIR)/lib/*.o $(BUILD_DIR)/test/*.o -o $(BUILD_DIR)/test/run_test
+
+test: build_test
+	$(BUILD_DIR)/test/run_test
 
 clean:
 	$(RM) $(BUILD_DIR)
