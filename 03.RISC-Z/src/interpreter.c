@@ -1,15 +1,24 @@
 #include "interpreter.h"
+#include <assert.h>
 
 static ExitCode execute_I_instruction(rv_cpu *cpu, rv_instruction instr) {
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
     int imm = instr.I_type.imm;
+    int pc_before = cpu->pc;
     cpu->pc += INSTRUCTION_WIDTH;
-    switch (instr.type_accessor.funct3)
+    int pc_after = cpu->pc;
+    switch (instr.type_accessor.opcode)
     {
         default:
             break;
-        case ADDI_funct3:
+        case JALR_opcode:
+            assert(instr.type_accessor.funct3 == JALR_funct3);
+            cpu->x[rd] = pc_after;
+            cpu->pc = rs1 + imm;
+            return OK;
+        case ADDI_opcode:
+            assert(instr.type_accessor.funct3 == ADDI_funct3);
             cpu->x[rd] = cpu->x[rd] + imm;
             return OK;
     }
@@ -66,6 +75,7 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_instruction instr) {
             return execute_U_instruction(cpu, instr);
         case JAL_opcode:
             return execute_J_instruction(cpu, instr);
+        case JALR_opcode:
         case ADDI_opcode:
             return execute_I_instruction(cpu, instr);
     }

@@ -35,6 +35,9 @@ TEST_ONE_INSTR_START_PC(TEST_AUIPC, 0x00001097, cpu.x[1] == 0x00001004, 4)
 TEST_ONE_INSTR_START_PC(TEST_JAL_NEGATIVE_IMM, 0xffdff0ef, cpu.pc == 0 && cpu.x[1] == 8, 4)
 // jal x1, 8
 TEST_ONE_INSTR_START_PC(TEST_JAL_POSITIVE_IMM, 0x008000ef, cpu.pc == 12 && cpu.x[1] == 8, 4)
+// jalr x1 x0 8
+// TODO add test with no zero register as rs1
+TEST_ONE_INSTR(TEST_JALR, 0x008000e7, cpu.pc == 8 && cpu.x[1] == 4)
 
 
 #define TEST_FUNCTIONS(F) \
@@ -43,7 +46,8 @@ TEST_ONE_INSTR_START_PC(TEST_JAL_POSITIVE_IMM, 0x008000ef, cpu.pc == 12 && cpu.x
     F(TEST_LUI) \
     F(TEST_AUIPC) \
     F(TEST_JAL_NEGATIVE_IMM) \
-    F(TEST_JAL_POSITIVE_IMM)
+    F(TEST_JAL_POSITIVE_IMM) \
+    F(TEST_JALR)
 
 int main(int argc, char *argv[])
 {

@@ -63,6 +63,7 @@ inline rv_instruction rv_instruction_from_int(int encoding) {
     F(LUI, 0b0110111, MISSING_FUNCT3, MISSING_FUNCT7) \
     F(AUIPC, 0b0010111, MISSING_FUNCT3, MISSING_FUNCT7) \
     F(JAL, 0b1101111, MISSING_FUNCT3, MISSING_FUNCT7) \
+    F(JALR, 0b1100111, 0, MISSING_FUNCT7) \
     F(ADDI, 0b0010011, 0, MISSING_FUNCT7)
 
 #define STR_CAT(x, y) x ## y
