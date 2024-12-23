@@ -4,9 +4,14 @@
 
 typedef union {
     int encoding;
-    /*struct {
-
-    } R_type;*/
+    struct {
+        unsigned int opcode : 7;
+        unsigned int rd : 5;
+        unsigned int funct3 : 3;
+        unsigned int rs1 : 5;
+        unsigned int rs2 : 5;
+        int imm : 7;
+    } R_type;
     struct {
         unsigned int opcode : 7;
         unsigned int rd : 5;
@@ -95,7 +100,10 @@ static inline rv_instruction rv_instruction_from_int(int encoding) {
     F(SLTIU, 0b0010011, 0b011, MISSING_FUNCT7) \
     F(XORI, 0b0010011, 0b100, MISSING_FUNCT7) \
     F(ORI, 0b0010011, 0b110, MISSING_FUNCT7) \
-    F(ANDI, 0b0010011, 0b111, MISSING_FUNCT7)
+    F(ANDI, 0b0010011, 0b111, MISSING_FUNCT7) \
+    F(SLLI, 0b0010011, 0b001, 0b0000000) \
+    F(SRLI, 0b0010011, 0b101, 0b0000000) \
+    F(SRAI, 0b0010011, 0b101, 0b0100000)
 
 #define STR_CAT(x, y) x ## y
 

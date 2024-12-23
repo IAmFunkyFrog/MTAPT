@@ -39,7 +39,36 @@ static ExitCode execute_load(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     return ERROR;
 }
 
-static ExitCode execute_arithmetic_with_imm(rv_cpu *cpu, rv_instruction instr) {
+static ExitCode execute_R_instruction(rv_cpu *cpu, rv_instruction instr) {
+    assert(instr.type_accessor.opcode == ADDI_opcode);
+    unsigned int rd = instr.R_type.rd;
+    unsigned int rs1 = instr.R_type.rs1;
+    unsigned int rs2 = instr.R_type.rs2;
+    int imm = instr.R_type.imm;
+    if (instr.R_type.opcode == SLLI_opcode) {
+        switch (instr.type_accessor.funct3)
+        {
+            default:
+                break;
+            case SLLI_funct3: {
+                unsigned int shift = rs2;
+                cpu->x[rd] = cpu->x[rs1] << shift;
+                return OK;
+            }
+            // case SRAI_funct3:
+            case SRLI_funct3: {
+                unsigned int shift = rs2;
+                if (instr.type_accessor.funct7 == SRLI_funct7) cpu->x[rd] = ((unsigned int) cpu->x[rs1]) >> shift;
+                else if (instr.type_accessor.funct7 == SRAI_funct7) cpu->x[rd] = cpu->x[rs1] >> shift;
+                else return ERROR;
+                return OK;
+            }
+        }
+    }
+    return ERROR;
+}
+
+static ExitCode execute_arithmetic_with_imm_or_R_instruction(rv_cpu *cpu, rv_instruction instr) {
     assert(instr.type_accessor.opcode == ADDI_opcode);
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
@@ -68,6 +97,10 @@ static ExitCode execute_arithmetic_with_imm(rv_cpu *cpu, rv_instruction instr) {
         case ANDI_funct3:
             cpu->x[rd] = cpu->x[rs1] & imm;
             return OK;
+        case SLLI_funct3:
+        case SRLI_funct3:
+        // case SRAI_funct3:
+            return execute_R_instruction(cpu, instr);
     }
     return ERROR;
 }
@@ -94,7 +127,10 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
         // case XORI_opcode:
         // case ORI_opcode:
         // case ANDI_opcode:
-            return execute_arithmetic_with_imm(cpu, instr);
+        // case SLLI_opcode:
+        // case SRLI_opcode:
+        // case SRAI_opcode:
+            return execute_arithmetic_with_imm_or_R_instruction(cpu, instr);
         case LB_opcode:
         // case LH_opcode:
         // case LW_opcode:
@@ -236,6 +272,9 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
         // case XORI_opcode:
         // case ORI_opcode:
         // case ANDI_opcode:
+        // case SLLI_opcode:
+        // case SRLI_opcode:
+        // case SRAI_opcode:
         case LB_opcode:
         // case LH_opcode:
         // case LW_opcode:
