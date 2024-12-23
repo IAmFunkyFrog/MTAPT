@@ -39,6 +39,39 @@ static ExitCode execute_load(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     return ERROR;
 }
 
+static ExitCode execute_arithmetic_with_imm(rv_cpu *cpu, rv_instruction instr) {
+    assert(instr.type_accessor.opcode == ADDI_opcode);
+    unsigned int rd = instr.I_type.rd;
+    unsigned int rs1 = instr.I_type.rs1;
+    int imm = instr.I_type.imm;
+    switch (instr.type_accessor.funct3)
+    {
+        default:
+            break;
+        case ADDI_funct3:
+            cpu->x[rd] = cpu->x[rs1] + imm;
+            return OK;
+        case SLTI_funct3:
+            if (cpu->x[rs1] < imm) cpu->x[rd] = 1;
+            else cpu->x[rd] = 0;
+            return OK;
+        case SLTIU_funct3:
+            if (((unsigned int) cpu->x[rs1]) < ((unsigned int) imm)) cpu->x[rd] = 1;
+            else cpu->x[rd] = 0;
+            return OK;
+        case XORI_funct3:
+            cpu->x[rd] = cpu->x[rs1] ^ imm;
+            return OK;
+        case ORI_funct3:
+            cpu->x[rd] = cpu->x[rs1] | imm;
+            return OK;
+        case ANDI_funct3:
+            cpu->x[rd] = cpu->x[rs1] & imm;
+            return OK;
+    }
+    return ERROR;
+}
+
 static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
@@ -56,9 +89,12 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
             cpu->pc = cpu->x[rs1] + imm;
             return OK;
         case ADDI_opcode:
-            assert(instr.type_accessor.funct3 == ADDI_funct3);
-            cpu->x[rd] = cpu->x[rs1] + imm;
-            return OK;
+        // case SLTI_opcode:
+        // case SLTIU_opcode:
+        // case XORI_opcode:
+        // case ORI_opcode:
+        // case ANDI_opcode:
+            return execute_arithmetic_with_imm(cpu, instr);
         case LB_opcode:
         // case LH_opcode:
         // case LW_opcode:
@@ -195,6 +231,11 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
             return execute_J_instruction(cpu, instr);
         case JALR_opcode:
         case ADDI_opcode:
+        // case SLTI_opcode:
+        // case SLTIU_opcode:
+        // case XORI_opcode:
+        // case ORI_opcode:
+        // case ANDI_opcode:
         case LB_opcode:
         // case LH_opcode:
         // case LW_opcode:

@@ -115,6 +115,16 @@ TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_SH, {.encoding = 0x00111023}; cpu.x[2] = 100
 TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_SW, {.encoding = 0x00112023}; cpu.x[2] = 100; cpu.x[1] = 0xdeadbeef;, data == 0xdeadbeef,
     int data = 0
 )
+// slti x1, x0, 1
+TEST_ONE_INSTR(TEST_SLTI, 0x00102093, cpu.x[1] == 1)
+// sltiu x1, x0, -1
+TEST_ONE_INSTR(TEST_SLTIU, 0xfff03093, cpu.x[1] == 1)
+// xori x1, x0, -1
+TEST_ONE_INSTR(TEST_XORI, 0xfff04093, cpu.x[1] == -1)
+// ori x1, x0, 1
+TEST_ONE_INSTR(TEST_ORI, 0x00106093, cpu.x[1] == 1)
+// andi x1, x2, 1
+TEST_ONE_INSTR_START_PC(TEST_ANDI, {.encoding = 0x00117093}; cpu.x[2] = 3, cpu.x[1] == 1, 0)
 
 #define TEST_FUNCTIONS(F) \
     F(TEST_ADDI_POSITIVE_IMM) \
@@ -141,7 +151,12 @@ TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_SW, {.encoding = 0x00112023}; cpu.x[2] = 100
     F(TEST_LHU) \
     F(TEST_SB) \
     F(TEST_SH) \
-    F(TEST_SW)
+    F(TEST_SW) \
+    F(TEST_SLTI) \
+    F(TEST_SLTIU) \
+    F(TEST_XORI) \
+    F(TEST_ORI) \
+    F(TEST_ANDI)
 
 int main(int argc, char *argv[])
 {
