@@ -34,3 +34,21 @@ static inline unsigned int rv_memory_read_int(rv_memory mem, int addr) {
 
     return *((unsigned int *) ptr);
 }
+
+static inline void rv_memory_store_byte(rv_memory mem, int addr, unsigned char b) {
+    void *ptr = rv_memory_get_ptr(mem, addr);
+    assert(ptr != NULL);
+    *((unsigned char *) ptr) = b;
+}
+
+static inline void rv_memory_store_short(rv_memory mem, int addr, unsigned short s) {
+    void *ptr = rv_memory_get_ptr(mem, addr);
+    assert(ptr != NULL);
+    *((unsigned short *) ptr) = s;
+}
+
+static inline void rv_memory_store_int(rv_memory mem, int addr, unsigned int i) {
+    void *ptr = rv_memory_get_ptr(mem, addr);
+    assert(ptr != NULL);
+    *((unsigned int *) ptr) = i;
+}

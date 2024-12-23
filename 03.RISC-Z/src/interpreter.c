@@ -154,6 +154,35 @@ static ExitCode execute_B_instruction(rv_cpu *cpu, rv_instruction instr) {
     return ERROR;
 }
 
+static ExitCode execute_S_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
+    assert(instr.type_accessor.opcode == SB_opcode);
+    unsigned int rs1 = instr.S_type.rs1;
+    unsigned int rs2 = instr.S_type.rs2;
+    unsigned int read_imm = instr.S_type.imm4_0 | instr.S_type.imm11_5 << 5;
+    int imm = ((int) read_imm << 20) >> 20; // Note: sign extend read_imm to integer
+    int pc_before = cpu->pc;
+    cpu->pc += INSTRUCTION_WIDTH;
+    int pc_after = cpu->pc;
+    switch (instr.type_accessor.funct3)
+    {
+        default:
+            return ERROR;
+        case SB_funct3: {
+            rv_memory_store_byte(mem, cpu->x[rs1] + imm, cpu->x[rs2]);
+            return OK;
+        }
+        case SH_funct3: {
+            rv_memory_store_short(mem, cpu->x[rs1] + imm, cpu->x[rs2]);
+            return OK;
+        }
+        case SW_funct3: {
+            rv_memory_store_int(mem, cpu->x[rs1] + imm, cpu->x[rs2]);
+            return OK;
+        }
+    }
+    return ERROR;
+}
+
 static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     switch (instr.type_accessor.opcode)
     {
@@ -175,6 +204,10 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
         case BEQ_opcode:
         // case BNE_opcode:
             return execute_B_instruction(cpu, instr);
+        case SB_opcode:
+        // case SH_opcode:
+        // case SW_opcode:
+            return execute_S_instruction(cpu, mem, instr);
     }
     return ERROR;
 }

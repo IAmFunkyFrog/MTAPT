@@ -103,6 +103,18 @@ TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LBU, {.encoding = 0x00014083}; cpu.x[2] = 10
 TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LHU, {.encoding = 0x00015083}; cpu.x[2] = 100, cpu.x[1] == 0xbeef,
     short data = 0xbeef
 )
+// sb x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_SB, {.encoding = 0x00110023}; cpu.x[2] = 100; cpu.x[1] = -1;, data == -1,
+    char data = 0
+)
+// sh x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_SH, {.encoding = 0x00111023}; cpu.x[2] = 100; cpu.x[1] = 0xbeef;, data == 0xbeef,
+    unsigned short data = 0
+)
+// sw x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_SW, {.encoding = 0x00112023}; cpu.x[2] = 100; cpu.x[1] = 0xdeadbeef;, data == 0xdeadbeef,
+    int data = 0
+)
 
 #define TEST_FUNCTIONS(F) \
     F(TEST_ADDI_POSITIVE_IMM) \
@@ -126,7 +138,10 @@ TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LHU, {.encoding = 0x00015083}; cpu.x[2] = 10
     F(TEST_LH) \
     F(TEST_LW) \
     F(TEST_LBU) \
-    F(TEST_LHU)
+    F(TEST_LHU) \
+    F(TEST_SB) \
+    F(TEST_SH) \
+    F(TEST_SW)
 
 int main(int argc, char *argv[])
 {
