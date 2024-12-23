@@ -19,12 +19,14 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
             return OK;
         case ADDI_opcode:
             assert(instr.type_accessor.funct3 == ADDI_funct3);
-            cpu->x[rd] = cpu->x[rd] + imm;
+            cpu->x[rd] = cpu->x[rs1] + imm;
             return OK;
-        case LB_opcode:
+        case LB_opcode: {
             assert(instr.type_accessor.funct3 == LB_funct3);
-            cpu->x[rd] = rv_memory_read_byte(mem, cpu->x[rd] + imm);
+            unsigned char b = rv_memory_read_byte(mem, cpu->x[rs1] + imm);
+            cpu->x[rd] = (int) ((b << 24) >> 24); // sign extension
             return OK;
+        }
     }
 }
 

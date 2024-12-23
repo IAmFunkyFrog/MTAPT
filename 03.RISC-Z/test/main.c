@@ -5,11 +5,11 @@
 #include "interpreter.h"
 #include "assert.h"
 
-#define TEST_ONE_INSTR_START_PC(name, initializer, condition, start_pc) \
+#define TEST_ONE_INSTR_START_PC_MEMORY(name, initializer, condition, start_pc, memory_initializer) \
     ExitCode name() { \
         rv_cpu cpu = {.pc = start_pc}; \
         rv_instruction instr = (rv_instruction) initializer; \
-        rv_memory mem; \
+        memory_initializer \
         ExitCode code = rv_cpu_cycle(&cpu, mem, instr); \
         if (code != OK) {\
             rv_dump_cpu(&cpu); \
@@ -21,8 +21,16 @@
         return ERROR; \
     }
 
+#define TEST_ONE_INSTR_START_PC(name, initializer, condition, start_pc) \
+    TEST_ONE_INSTR_START_PC_MEMORY(name, initializer, condition, start_pc, rv_memory mem;)
+
 #define TEST_ONE_INSTR(name, instr_encoding, condition) \
     TEST_ONE_INSTR_START_PC(name, {.encoding = instr_encoding}, condition, 0)
+
+#define TEST_ONE_INSTR_MEMORY(name, initializer, condition, memory_initializer) \
+    TEST_ONE_INSTR_START_PC_MEMORY(name, initializer, condition, 0, memory_initializer)
+
+#define COMMA ,
 
 // addi x1, x0, 1
 TEST_ONE_INSTR(TEST_ADDI_POSITIVE_IMM, 0x00100093, cpu.x[1] == 1)
@@ -64,7 +72,15 @@ TEST_ONE_INSTR_START_PC(TEST_POSITIVE_BGE_JUMP, {.encoding = 0x00105463}; cpu.x[
 TEST_ONE_INSTR_START_PC(TEST_POSITIVE_BLTU_JUMP, {.encoding = 0x00106463}; cpu.x[1] = -1, cpu.pc == 12, 4)
 // bltu x0, x1, 8 where x1 == 0
 TEST_ONE_INSTR_START_PC(TEST_POSITIVE_BLTU_NO_JUMP, {.encoding = 0x00106463}; cpu.x[1] = 0, cpu.pc == 8, 4)
-// TODO test bgeu
+// lb x1, 0(x2)
+TEST_ONE_INSTR_MEMORY(TEST_LB, {.encoding = 0x00010083}; cpu.x[2] = 100, cpu.x[1] == -1,
+    int data = -1;
+    rv_memory_chunk chunk;
+    chunk.memory = &data;
+    chunk.start = 100;
+    chunk.end = 100 + sizeof(data);
+    rv_memory mem = {.first_chunk = &chunk};
+)
 
 
 #define TEST_FUNCTIONS(F) \
@@ -84,7 +100,8 @@ TEST_ONE_INSTR_START_PC(TEST_POSITIVE_BLTU_NO_JUMP, {.encoding = 0x00106463}; cp
     F(TEST_POSITIVE_BGE_JUMP) \
     F(TEST_POSITIVE_BGE_NO_JUMP) \
     F(TEST_POSITIVE_BLTU_JUMP) \
-    F(TEST_POSITIVE_BLTU_NO_JUMP)
+    F(TEST_POSITIVE_BLTU_NO_JUMP) \
+    F(TEST_LB)
 
 int main(int argc, char *argv[])
 {
