@@ -78,6 +78,33 @@ static ExitCode execute_R_instruction(rv_cpu *cpu, rv_instruction instr) {
             else return ERROR;
             return OK;
         }
+        case SLL_funct3:
+            cpu->x[rd] = cpu->x[rs1] << (cpu->x[rs2] & 0x1F);
+            return OK;
+        case SLT_funct3:
+            if (cpu->x[rs1] < cpu->x[rs2]) cpu->x[rd] = 1;
+            else cpu->x[rd] = 0;
+            return OK;
+        case SLTU_funct3:
+            if (((unsigned int) cpu->x[rs1]) < ((unsigned int) cpu->x[rs2])) cpu->x[rd] = 1;
+            else cpu->x[rd] = 0;
+            return OK;
+        case XOR_funct3:
+            cpu->x[rd] = cpu->x[rs1] ^ cpu->x[rs2];
+            return OK;
+        // case SRA_funct3
+        case SRL_funct3: {
+            if (instr.type_accessor.funct7 == SRL_funct7) cpu->x[rd] = ((unsigned int) cpu->x[rs1]) >> (cpu->x[rs2] & 0x1F);
+            else if (instr.type_accessor.funct7 == SRA_funct7) cpu->x[rd] = cpu->x[rs1] >> (cpu->x[rs2] & 0x1F);
+            else return ERROR;
+            return OK;
+        }
+        case OR_funct3:
+            cpu->x[rd] = cpu->x[rs1] | cpu->x[rs2];
+            return OK;
+        case AND_funct3:
+            cpu->x[rd] = cpu->x[rs1] & cpu->x[rs2];
+            return OK;
     }
     return ERROR;
 }
@@ -304,6 +331,14 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
             return execute_S_instruction(cpu, mem, instr);
         case ADD_opcode:
         // case SUB_opcode:
+        // case SLL_opcode:
+        // case SLT_opcode:
+        // case SLTU_opcode:
+        // case XOR_opcode:
+        // case SRL_opcode:
+        // case SRA_opcode:
+        // case OR_opcode:
+        // case AND_opcode:
             return execute_R_instruction(cpu, instr);
     }
     return ERROR;

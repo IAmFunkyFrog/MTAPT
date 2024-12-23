@@ -135,6 +135,22 @@ TEST_ONE_INSTR_START_PC(TEST_SRAI, {.encoding = 0x40115093}; cpu.x[2] = -1, cpu.
 TEST_ONE_INSTR_START_PC(TEST_ADD, {.encoding = 0x003100b3}; cpu.x[2] = 1;, cpu.x[1] == 1, 0)
 // sub x1, x2, x3
 TEST_ONE_INSTR_START_PC(TEST_SUB, {.encoding = 0x403100b3}; cpu.x[2] = 1; cpu.x[3] = 2, cpu.x[1] == -1, 0)
+// sll x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_SLL, {.encoding = 0x003110b3}; cpu.x[2] = 1; cpu.x[3] = 1, cpu.x[1] == 2, 0)
+// slt x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_SLT, {.encoding = 0x003120b3}; cpu.x[2] = 1; cpu.x[3] = 2, cpu.x[1] == 1, 0)
+// sltu x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_SLTU, {.encoding = 0x003130b3}; cpu.x[2] = 1; cpu.x[3] = -1, cpu.x[1] == 1, 0)
+// xor x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_XOR, {.encoding = 0x003140b3}; cpu.x[2] = 1; cpu.x[3] = 2, cpu.x[1] == 3, 0)
+// srl x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_SRL, {.encoding = 0x003150b3}; cpu.x[2] = -1; cpu.x[3] = 1, cpu.x[1] == ((unsigned int) -1) >> 1, 0)
+// sra x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_SRA, {.encoding = 0x403150b3}; cpu.x[2] = -1; cpu.x[3] = 1, cpu.x[1] == -1, 0)
+// or x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_OR, {.encoding = 0x003160b3}; cpu.x[2] = 1; cpu.x[3] = 2, cpu.x[1] == 3, 0)
+// and x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_AND, {.encoding = 0x003170b3}; cpu.x[2] = 1; cpu.x[3] = 2, cpu.x[1] == 0, 0)
 
 #define TEST_FUNCTIONS(F) \
     F(TEST_ADDI_POSITIVE_IMM) \
@@ -171,7 +187,15 @@ TEST_ONE_INSTR_START_PC(TEST_SUB, {.encoding = 0x403100b3}; cpu.x[2] = 1; cpu.x[
     F(TEST_SRLI) \
     F(TEST_SRAI) \
     F(TEST_ADD) \
-    F(TEST_SUB)
+    F(TEST_SUB) \
+    F(TEST_SLL) \
+    F(TEST_SLT) \
+    F(TEST_SLTU) \
+    F(TEST_XOR) \
+    F(TEST_SRL) \
+    F(TEST_SRA) \
+    F(TEST_OR) \
+    F(TEST_AND)
 
 int main(int argc, char *argv[])
 {

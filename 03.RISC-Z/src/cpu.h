@@ -76,6 +76,7 @@ static inline rv_instruction rv_instruction_from_int(int encoding) {
 #define MISSING_FUNCT3 0
 #define MISSING_FUNCT7 0
 
+// TODO implement FENCE and PAUSE
 #define X_MACRO_INSTRUCTION(F) \
     F(LUI, 0b0110111, MISSING_FUNCT3, MISSING_FUNCT7) \
     F(AUIPC, 0b0010111, MISSING_FUNCT3, MISSING_FUNCT7) \
@@ -105,7 +106,15 @@ static inline rv_instruction rv_instruction_from_int(int encoding) {
     F(SRLI, 0b0010011, 0b101, 0b0000000) \
     F(SRAI, 0b0010011, 0b101, 0b0100000) \
     F(ADD, 0b0110011, 0b000, 0b0000000) \
-    F(SUB, 0b0110011, 0b000, 0b0100000)
+    F(SUB, 0b0110011, 0b000, 0b0100000) \
+    F(SLL, 0b0110011, 0b001, 0b0000000) \
+    F(SLT, 0b0110011, 0b010, 0b0000000) \
+    F(SLTU, 0b0110011, 0b011, 0b0000000) \
+    F(XOR, 0b0110011, 0b100, 0b0000000) \
+    F(SRL, 0b0110011, 0b101, 0b0000000) \
+    F(SRA, 0b0110011, 0b101, 0b0100000) \
+    F(OR, 0b0110011, 0b110, 0b0000000) \
+    F(AND, 0b0110011, 0b111, 0b0000000)
 
 #define STR_CAT(x, y) x ## y
 
