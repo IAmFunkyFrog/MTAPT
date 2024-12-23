@@ -15,7 +15,7 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_instruction instr) {
         case JALR_opcode:
             assert(instr.type_accessor.funct3 == JALR_funct3);
             cpu->x[rd] = pc_after;
-            cpu->pc = rs1 + imm;
+            cpu->pc = cpu->x[rs1] + imm;
             return OK;
         case ADDI_opcode:
             assert(instr.type_accessor.funct3 == ADDI_funct3);
@@ -65,6 +65,50 @@ static ExitCode execute_J_instruction(rv_cpu *cpu, rv_instruction instr) {
     return ERROR;
 }
 
+static ExitCode execute_B_instruction(rv_cpu *cpu, rv_instruction instr) {
+    assert(instr.type_accessor.opcode == BEQ_opcode && "all B instructions should have such opcode");
+    unsigned int rs1 = instr.B_type.rs1;
+    unsigned int rs2 = instr.B_type.rs2;
+    unsigned int read_imm = instr.B_type.imm4_1 << 1 |
+              instr.B_type.imm11 << 11 |
+              instr.B_type.imm10_5 << 5 |
+              instr.B_type.imm12 << 12;
+    int imm = ((int) read_imm << 20) >> 20; // Note: sign extend read_imm to integer
+    int pc_before = cpu->pc;
+    cpu->pc += INSTRUCTION_WIDTH;
+    int pc_after = cpu->pc;
+    switch (instr.type_accessor.funct3)
+    {
+        default:
+            return ERROR;
+        case BEQ_funct3:
+            if (cpu->x[rs1] == cpu->x[rs2]) cpu->pc = pc_before + imm;
+            else cpu->pc = pc_after;
+            return OK;
+        case BNE_funct3:
+            if (cpu->x[rs1] != cpu->x[rs2]) cpu->pc = pc_before + imm;
+            else cpu->pc = pc_after;
+            return OK;
+        case BLT_funct3:
+            if (cpu->x[rs1] < cpu->x[rs2]) cpu->pc = pc_before + imm;
+            else cpu->pc = pc_after;
+            return OK;
+        case BGE_funct3:
+            if (cpu->x[rs1] >= cpu->x[rs2]) cpu->pc = pc_before + imm;
+            else cpu->pc = pc_after;
+            return OK;
+        case BLTU_funct3:
+            if (((unsigned int) cpu->x[rs1]) < ((unsigned int) cpu->x[rs2])) cpu->pc = pc_before + imm;
+            else cpu->pc = pc_after;
+            return OK;
+        case BGEU_funct3:
+            if (((unsigned int) cpu->x[rs1]) >= ((unsigned int) cpu->x[rs2])) cpu->pc = pc_before + imm;
+            else cpu->pc = pc_after;
+            return OK;
+    }
+    return ERROR;
+}
+
 static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_instruction instr) {
     switch (instr.type_accessor.opcode)
     {
@@ -78,6 +122,9 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_instruction instr) {
         case JALR_opcode:
         case ADDI_opcode:
             return execute_I_instruction(cpu, instr);
+        case BEQ_opcode:
+        // case BNE_opcode:
+            return execute_B_instruction(cpu, instr);
     }
     return ERROR;
 }

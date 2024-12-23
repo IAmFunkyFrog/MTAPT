@@ -18,7 +18,14 @@ typedef union {
 
     } S_type;
     struct {
-
+        unsigned int opcode : 7;
+        unsigned int imm11 : 1;
+        unsigned int imm4_1 : 4;
+        unsigned int funct3 : 3;
+        unsigned int rs1 : 5;
+        unsigned int rs2 : 5;
+        unsigned int imm10_5 : 6;
+        unsigned int imm12 : 1;
     } B_type;
     struct {
         unsigned int opcode : 7;
@@ -64,6 +71,12 @@ inline rv_instruction rv_instruction_from_int(int encoding) {
     F(AUIPC, 0b0010111, MISSING_FUNCT3, MISSING_FUNCT7) \
     F(JAL, 0b1101111, MISSING_FUNCT3, MISSING_FUNCT7) \
     F(JALR, 0b1100111, 0, MISSING_FUNCT7) \
+    F(BEQ, 0b1100011, 0b000, MISSING_FUNCT7) \
+    F(BNE, 0b1100011, 0b001, MISSING_FUNCT7) \
+    F(BLT, 0b1100011, 0b100, MISSING_FUNCT7) \
+    F(BGE, 0b1100011, 0b101, MISSING_FUNCT7) \
+    F(BLTU, 0b1100011, 0b110, MISSING_FUNCT7) \
+    F(BGEU, 0b1100011, 0b111, MISSING_FUNCT7) \
     F(ADDI, 0b0010011, 0, MISSING_FUNCT7)
 
 #define STR_CAT(x, y) x ## y
