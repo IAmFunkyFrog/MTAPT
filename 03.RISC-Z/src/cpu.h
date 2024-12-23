@@ -103,7 +103,9 @@ static inline rv_instruction rv_instruction_from_int(int encoding) {
     F(ANDI, 0b0010011, 0b111, MISSING_FUNCT7) \
     F(SLLI, 0b0010011, 0b001, 0b0000000) \
     F(SRLI, 0b0010011, 0b101, 0b0000000) \
-    F(SRAI, 0b0010011, 0b101, 0b0100000)
+    F(SRAI, 0b0010011, 0b101, 0b0100000) \
+    F(ADD, 0b0110011, 0b000, 0b0000000) \
+    F(SUB, 0b0110011, 0b000, 0b0100000)
 
 #define STR_CAT(x, y) x ## y
 

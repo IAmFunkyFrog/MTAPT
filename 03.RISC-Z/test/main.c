@@ -131,6 +131,10 @@ TEST_ONE_INSTR_START_PC(TEST_SLLI, {.encoding = 0x00111093}; cpu.x[2] = 1, cpu.x
 TEST_ONE_INSTR_START_PC(TEST_SRLI, {.encoding = 0x00115093}; cpu.x[2] = -1, cpu.x[1] == ((unsigned int) -1) >> 1, 0)
 // srai x1, x2, 1
 TEST_ONE_INSTR_START_PC(TEST_SRAI, {.encoding = 0x40115093}; cpu.x[2] = -1, cpu.x[1] == -1, 0)
+// add x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_ADD, {.encoding = 0x003100b3}; cpu.x[2] = 1;, cpu.x[1] == 1, 0)
+// sub x1, x2, x3
+TEST_ONE_INSTR_START_PC(TEST_SUB, {.encoding = 0x403100b3}; cpu.x[2] = 1; cpu.x[3] = 2, cpu.x[1] == -1, 0)
 
 #define TEST_FUNCTIONS(F) \
     F(TEST_ADDI_POSITIVE_IMM) \
@@ -165,7 +169,9 @@ TEST_ONE_INSTR_START_PC(TEST_SRAI, {.encoding = 0x40115093}; cpu.x[2] = -1, cpu.
     F(TEST_ANDI) \
     F(TEST_SLLI) \
     F(TEST_SRLI) \
-    F(TEST_SRAI)
+    F(TEST_SRAI) \
+    F(TEST_ADD) \
+    F(TEST_SUB)
 
 int main(int argc, char *argv[])
 {

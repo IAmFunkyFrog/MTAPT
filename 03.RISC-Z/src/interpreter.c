@@ -40,7 +40,6 @@ static ExitCode execute_load(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
 }
 
 static ExitCode execute_R_instruction(rv_cpu *cpu, rv_instruction instr) {
-    assert(instr.type_accessor.opcode == ADDI_opcode);
     unsigned int rd = instr.R_type.rd;
     unsigned int rs1 = instr.R_type.rs1;
     unsigned int rs2 = instr.R_type.rs2;
@@ -63,6 +62,21 @@ static ExitCode execute_R_instruction(rv_cpu *cpu, rv_instruction instr) {
                 else return ERROR;
                 return OK;
             }
+        }
+        return ERROR;
+    }
+
+    assert(instr.type_accessor.opcode == ADD_opcode);
+    switch (instr.type_accessor.funct3)
+    {
+        default:
+            break;
+        // case SUB_opcode:
+        case ADD_funct3: {
+            if (instr.type_accessor.funct7 == ADD_funct7) cpu->x[rd] = cpu->x[rs1] + cpu->x[rs2];
+            else if (instr.type_accessor.funct7 == SUB_funct7) cpu->x[rd] = cpu->x[rs1] - cpu->x[rs2];
+            else return ERROR;
+            return OK;
         }
     }
     return ERROR;
@@ -288,6 +302,9 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
         // case SH_opcode:
         // case SW_opcode:
             return execute_S_instruction(cpu, mem, instr);
+        case ADD_opcode:
+        // case SUB_opcode:
+            return execute_R_instruction(cpu, instr);
     }
     return ERROR;
 }
