@@ -78,6 +78,10 @@ static inline rv_instruction rv_instruction_from_int(int encoding) {
     F(BLTU, 0b1100011, 0b110, MISSING_FUNCT7) \
     F(BGEU, 0b1100011, 0b111, MISSING_FUNCT7) \
     F(LB, 0b0000011, 0b000, MISSING_FUNCT7) \
+    F(LH, 0b0000011, 0b001, MISSING_FUNCT7) \
+    F(LW, 0b0000011, 0b010, MISSING_FUNCT7) \
+    F(LBU, 0b0000011, 0b100, MISSING_FUNCT7) \
+    F(LHU, 0b0000011, 0b101, MISSING_FUNCT7) \
     F(ADDI, 0b0010011, 0, MISSING_FUNCT7)
 
 #define STR_CAT(x, y) x ## y

@@ -30,6 +30,17 @@
 #define TEST_ONE_INSTR_MEMORY(name, initializer, condition, memory_initializer) \
     TEST_ONE_INSTR_START_PC_MEMORY(name, initializer, condition, 0, memory_initializer)
 
+// Note: address of word is 100
+#define TEST_ONE_INSTR_MEMORY_ONE_WORD(name, initializer, condition, word) \
+    TEST_ONE_INSTR_START_PC_MEMORY(name, initializer, condition, 0, \
+        word; \
+        rv_memory_chunk chunk; \
+        chunk.memory = &data; \
+        chunk.start = 100; \
+        chunk.end = 100 + sizeof(data); \
+        rv_memory mem = {.first_chunk = &chunk}; \
+    )
+
 #define COMMA ,
 
 // addi x1, x0, 1
@@ -73,15 +84,25 @@ TEST_ONE_INSTR_START_PC(TEST_POSITIVE_BLTU_JUMP, {.encoding = 0x00106463}; cpu.x
 // bltu x0, x1, 8 where x1 == 0
 TEST_ONE_INSTR_START_PC(TEST_POSITIVE_BLTU_NO_JUMP, {.encoding = 0x00106463}; cpu.x[1] = 0, cpu.pc == 8, 4)
 // lb x1, 0(x2)
-TEST_ONE_INSTR_MEMORY(TEST_LB, {.encoding = 0x00010083}; cpu.x[2] = 100, cpu.x[1] == -1,
-    int data = -1;
-    rv_memory_chunk chunk;
-    chunk.memory = &data;
-    chunk.start = 100;
-    chunk.end = 100 + sizeof(data);
-    rv_memory mem = {.first_chunk = &chunk};
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LB, {.encoding = 0x00010083}; cpu.x[2] = 100, cpu.x[1] == -1,
+    char data = -1
 )
-
+// lh x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LH, {.encoding = 0x00011083}; cpu.x[2] = 100, cpu.x[1] == 0xFFFFbeef,
+    short data = 0xbeef
+)
+// lw x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LW, {.encoding = 0x00012083}; cpu.x[2] = 100, cpu.x[1] == 0xdeadbeef,
+    int data = 0xdeadbeef
+)
+// lbu x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LBU, {.encoding = 0x00014083}; cpu.x[2] = 100, cpu.x[1] == 255,
+    char data = -1
+)
+// lhu x1, 0(x2)
+TEST_ONE_INSTR_MEMORY_ONE_WORD(TEST_LHU, {.encoding = 0x00015083}; cpu.x[2] = 100, cpu.x[1] == 0xbeef,
+    short data = 0xbeef
+)
 
 #define TEST_FUNCTIONS(F) \
     F(TEST_ADDI_POSITIVE_IMM) \
@@ -101,7 +122,11 @@ TEST_ONE_INSTR_MEMORY(TEST_LB, {.encoding = 0x00010083}; cpu.x[2] = 100, cpu.x[1
     F(TEST_POSITIVE_BGE_NO_JUMP) \
     F(TEST_POSITIVE_BLTU_JUMP) \
     F(TEST_POSITIVE_BLTU_NO_JUMP) \
-    F(TEST_LB)
+    F(TEST_LB) \
+    F(TEST_LH) \
+    F(TEST_LW) \
+    F(TEST_LBU) \
+    F(TEST_LHU)
 
 int main(int argc, char *argv[])
 {

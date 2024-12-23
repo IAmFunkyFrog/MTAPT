@@ -1,6 +1,44 @@
 #include "interpreter.h"
 #include <assert.h>
 
+static ExitCode execute_load(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
+    assert(instr.type_accessor.opcode == LB_opcode);
+    unsigned int rd = instr.I_type.rd;
+    unsigned int rs1 = instr.I_type.rs1;
+    int imm = instr.I_type.imm;
+
+    switch (instr.type_accessor.funct3) {
+        default:
+            break;
+        case LB_funct3: {
+            unsigned char b = rv_memory_read_byte(mem, cpu->x[rs1] + imm);
+            cpu->x[rd] = (int) ((b << 24) >> 24); // sign extension
+            return OK;
+        }
+        case LH_funct3: {
+            unsigned short s = rv_memory_read_short(mem, cpu->x[rs1] + imm);
+            cpu->x[rd] = (int) ((s << 16) >> 16); // sign extension
+            return OK;
+        }
+        case LW_funct3: {
+            unsigned int i = rv_memory_read_int(mem, cpu->x[rs1] + imm);
+            cpu->x[rd] = i;
+            return OK;
+        }
+        case LBU_funct3: {
+            unsigned char b = rv_memory_read_byte(mem, cpu->x[rs1] + imm);
+            cpu->x[rd] = b;
+            return OK;
+        }
+        case LHU_funct3: {
+            unsigned short s = rv_memory_read_short(mem, cpu->x[rs1] + imm);
+            cpu->x[rd] = s;
+            return OK;
+        }
+    }
+    return ERROR;
+}
+
 static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
@@ -21,13 +59,14 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
             assert(instr.type_accessor.funct3 == ADDI_funct3);
             cpu->x[rd] = cpu->x[rs1] + imm;
             return OK;
-        case LB_opcode: {
-            assert(instr.type_accessor.funct3 == LB_funct3);
-            unsigned char b = rv_memory_read_byte(mem, cpu->x[rs1] + imm);
-            cpu->x[rd] = (int) ((b << 24) >> 24); // sign extension
-            return OK;
-        }
+        case LB_opcode:
+        // case LH_opcode:
+        // case LW_opcode:
+        // case LBU_opcode:
+        // case LHU_opcode:
+            return execute_load(cpu, mem, instr);
     }
+    return ERROR;
 }
 
 static ExitCode execute_U_instruction(rv_cpu *cpu, rv_instruction instr) {
@@ -128,6 +167,10 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
         case JALR_opcode:
         case ADDI_opcode:
         case LB_opcode:
+        // case LH_opcode:
+        // case LW_opcode:
+        // case LBU_opcode:
+        // case LHU_opcode:
             return execute_I_instruction(cpu, mem, instr);
         case BEQ_opcode:
         // case BNE_opcode:
