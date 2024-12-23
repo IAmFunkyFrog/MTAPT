@@ -9,7 +9,8 @@
     ExitCode name() { \
         rv_cpu cpu = {.pc = start_pc}; \
         rv_instruction instr = (rv_instruction) initializer; \
-        ExitCode code = rv_cpu_cycle(&cpu, instr); \
+        rv_memory mem; \
+        ExitCode code = rv_cpu_cycle(&cpu, mem, instr); \
         if (code != OK) {\
             rv_dump_cpu(&cpu); \
             return code; \

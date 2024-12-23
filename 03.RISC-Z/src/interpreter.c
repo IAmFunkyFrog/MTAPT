@@ -1,7 +1,7 @@
 #include "interpreter.h"
 #include <assert.h>
 
-static ExitCode execute_I_instruction(rv_cpu *cpu, rv_instruction instr) {
+static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
     int imm = instr.I_type.imm;
@@ -20,6 +20,10 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_instruction instr) {
         case ADDI_opcode:
             assert(instr.type_accessor.funct3 == ADDI_funct3);
             cpu->x[rd] = cpu->x[rd] + imm;
+            return OK;
+        case LB_opcode:
+            assert(instr.type_accessor.funct3 == LB_funct3);
+            cpu->x[rd] = rv_memory_read_byte(mem, cpu->x[rd] + imm);
             return OK;
     }
 }
@@ -109,7 +113,7 @@ static ExitCode execute_B_instruction(rv_cpu *cpu, rv_instruction instr) {
     return ERROR;
 }
 
-static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_instruction instr) {
+static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     switch (instr.type_accessor.opcode)
     {
         default:
@@ -121,7 +125,8 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_instruction instr) {
             return execute_J_instruction(cpu, instr);
         case JALR_opcode:
         case ADDI_opcode:
-            return execute_I_instruction(cpu, instr);
+        case LB_opcode:
+            return execute_I_instruction(cpu, mem, instr);
         case BEQ_opcode:
         // case BNE_opcode:
             return execute_B_instruction(cpu, instr);
@@ -130,9 +135,9 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_instruction instr) {
 }
 
 
-ExitCode rv_cpu_cycle(rv_cpu *cpu, rv_instruction instr) {
+ExitCode rv_cpu_cycle(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     cpu->x[0] = 0; // Note: paranoic :)
-    ExitCode code = rv_cpu_cycle_helper(cpu, instr);
+    ExitCode code = rv_cpu_cycle_helper(cpu, mem, instr);
     cpu->x[0] = 0;
     return code;
 }

@@ -59,7 +59,7 @@ typedef struct {
 
 void rv_dump_cpu(rv_cpu *cpu);
 
-inline rv_instruction rv_instruction_from_int(int encoding) {
+static inline rv_instruction rv_instruction_from_int(int encoding) {
     return (rv_instruction){.encoding = encoding};
 }
 
@@ -77,6 +77,7 @@ inline rv_instruction rv_instruction_from_int(int encoding) {
     F(BGE, 0b1100011, 0b101, MISSING_FUNCT7) \
     F(BLTU, 0b1100011, 0b110, MISSING_FUNCT7) \
     F(BGEU, 0b1100011, 0b111, MISSING_FUNCT7) \
+    F(LB, 0b0000011, 0b000, MISSING_FUNCT7) \
     F(ADDI, 0b0010011, 0, MISSING_FUNCT7)
 
 #define STR_CAT(x, y) x ## y
