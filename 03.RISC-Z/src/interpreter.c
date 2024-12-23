@@ -296,6 +296,18 @@ static ExitCode execute_S_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
     return ERROR;
 }
 
+static ExitCode execute_ecall(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
+    int imm = instr.I_type.imm;
+    assert(imm == 0 && "EBRAK not supported yet");
+    // Note: get ecalls from Venus https://github.com/61c-teach/venus/wiki/Environmental-Calls
+    if (cpu->x[10] == 1) {
+        // print_int
+        printf("%d\n", cpu->x[11]);
+        return OK;
+    }
+    return ERROR;
+}
+
 static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     switch (instr.type_accessor.opcode)
     {
@@ -340,6 +352,8 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
         // case OR_opcode:
         // case AND_opcode:
             return execute_R_instruction(cpu, instr);
+        case ECALL_opcode:
+            return execute_ecall(cpu, mem, instr);
     }
     return ERROR;
 }

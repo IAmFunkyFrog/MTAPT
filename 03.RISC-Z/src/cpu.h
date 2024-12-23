@@ -114,7 +114,8 @@ static inline rv_instruction rv_instruction_from_int(int encoding) {
     F(SRL, 0b0110011, 0b101, 0b0000000) \
     F(SRA, 0b0110011, 0b101, 0b0100000) \
     F(OR, 0b0110011, 0b110, 0b0000000) \
-    F(AND, 0b0110011, 0b111, 0b0000000)
+    F(AND, 0b0110011, 0b111, 0b0000000) \
+    F(ECALL, 0b1110011, MISSING_FUNCT3, MISSING_FUNCT7)
 
 #define STR_CAT(x, y) x ## y
 
