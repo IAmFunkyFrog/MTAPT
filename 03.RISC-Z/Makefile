@@ -3,6 +3,7 @@ RM=rm -rf
 BUILD_DIR=build
 SRC=src
 TEST=test
+INTEGRATION_TESTS=integration_tests
 
 all: main
 
@@ -24,8 +25,10 @@ build_test: build_objects
 	$(CC) -I$(SRC) $(TEST)/main.c -r -o $(BUILD_DIR)/test/main.o
 	$(CC) $(BUILD_DIR)/lib/*.o $(BUILD_DIR)/test/*.o -o $(BUILD_DIR)/test/run_test
 
-test: build_test
+test: build_test main
 	$(BUILD_DIR)/test/run_test
+	chmod +x $(INTEGRATION_TESTS)/*
+	$(INTEGRATION_TESTS)/compute_fib_5.sh
 
 clean:
 	$(RM) $(BUILD_DIR)
