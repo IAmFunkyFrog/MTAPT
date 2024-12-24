@@ -64,7 +64,8 @@ int main(int argc, char *argv[])
         // Note: first chunk is always code start
         rv_cpu cpu = {.pc = mem.first_chunk->start};
         cpu.x[2] = mem.first_chunk->next->end; // FIXME set stack pointer hardcoded
-        ExitCode code = rv_cpu_interpret_memory(&cpu, mem);
+        // FIXME instruction_endianess should be little
+        ExitCode code = rv_cpu_interpret_memory(&cpu, mem, /* instruction_endianess */ BIG);
         assert(code == EBREAK_exit);
     }
 

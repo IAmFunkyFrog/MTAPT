@@ -80,3 +80,43 @@ jobs:
         with:
           name: 02.Memory_Overcommit
           path: ${{ github.workspace }}/02.Memory_Overcommit/build
+  build_riscv:
+    name: Build 03.RISC-Z
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Build
+        run: |
+          cd 03.RISC-Z
+          make
+
+      - name: Save build
+        uses: actions/upload-artifact@v4
+        with:
+          name: 03.RISC-Z
+          path: ${{ github.workspace }}/03.RISC-Z/build
+  test_riscv:
+    name: Run tests on 03.RISC-Z
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install essentials
+        run: |
+          sudo apt-get update
+          sudo apt-get install build-essential
+
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Test
+        run: |
+          cd 03.RISC-Z
+          make test

@@ -373,14 +373,15 @@ ExitCode rv_cpu_cycle(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     return code;
 }
 
-ExitCode rv_cpu_interpret_memory(rv_cpu *cpu, rv_memory mem) {
+ExitCode rv_cpu_interpret_memory(rv_cpu *cpu, rv_memory mem, Endianess instruction_endianess) {
     ExitCode code;
     do {
         unsigned int instr_encoding = rv_memory_read_int(mem, cpu->pc);
         // FIXME currently we save files in big endian, because its easier...
         // Therefore, instructions in memory are big endian and we need byteswap instruction
-        // This should be fixed!!!
-        instr_encoding = __builtin_bswap32(instr_encoding);
+        // This should be fixed!!! Parser expects that instruction will be in little endian
+        if (instruction_endianess == BIG)
+            instr_encoding = __builtin_bswap32(instr_encoding);
         rv_instruction instr = (rv_instruction) {.encoding = instr_encoding};
         code = rv_cpu_cycle(cpu, mem, instr);
     } while (code == OK);
