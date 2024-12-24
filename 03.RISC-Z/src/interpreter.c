@@ -6,7 +6,7 @@ static ExitCode execute_load(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
     int imm = instr.I_type.imm;
-
+    cpu->pc += INSTRUCTION_WIDTH;
     switch (instr.type_accessor.funct3) {
         default:
             break;
@@ -39,11 +39,12 @@ static ExitCode execute_load(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     return ERROR;
 }
 
-static ExitCode execute_R_instruction(rv_cpu *cpu, rv_instruction instr) {
+static ExitCode execute_R_instruction(rv_cpu *cpu, rv_instruction instr, int move_pc) {
     unsigned int rd = instr.R_type.rd;
     unsigned int rs1 = instr.R_type.rs1;
     unsigned int rs2 = instr.R_type.rs2;
     int imm = instr.R_type.imm;
+    if (move_pc) cpu->pc += INSTRUCTION_WIDTH;
     if (instr.R_type.opcode == SLLI_opcode) {
         switch (instr.type_accessor.funct3)
         {
@@ -114,6 +115,7 @@ static ExitCode execute_arithmetic_with_imm_or_R_instruction(rv_cpu *cpu, rv_ins
     unsigned int rd = instr.I_type.rd;
     unsigned int rs1 = instr.I_type.rs1;
     int imm = instr.I_type.imm;
+    cpu->pc += INSTRUCTION_WIDTH;
     switch (instr.type_accessor.funct3)
     {
         default:
@@ -141,7 +143,7 @@ static ExitCode execute_arithmetic_with_imm_or_R_instruction(rv_cpu *cpu, rv_ins
         case SLLI_funct3:
         case SRLI_funct3:
         // case SRAI_funct3:
-            return execute_R_instruction(cpu, instr);
+            return execute_R_instruction(cpu, instr, /* move_pc */ 0);
     }
     return ERROR;
 }
@@ -151,8 +153,7 @@ static ExitCode execute_I_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
     unsigned int rs1 = instr.I_type.rs1;
     int imm = instr.I_type.imm;
     int pc_before = cpu->pc;
-    cpu->pc += INSTRUCTION_WIDTH;
-    int pc_after = cpu->pc;
+    int pc_after = cpu->pc + 4;
     switch (instr.type_accessor.opcode)
     {
         default:
@@ -298,7 +299,13 @@ static ExitCode execute_S_instruction(rv_cpu *cpu, rv_memory mem, rv_instruction
 
 static ExitCode execute_ecall(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     int imm = instr.I_type.imm;
-    assert(imm == 0 && "EBRAK not supported yet");
+
+    if (imm != 0) {
+        // Note: this is EBREAK
+        return EBREAK_exit;
+    }
+
+    cpu->pc += INSTRUCTION_WIDTH;
     // Note: get ecalls from Venus https://github.com/61c-teach/venus/wiki/Environmental-Calls
     if (cpu->x[10] == 1) {
         // print_int
@@ -351,7 +358,7 @@ static ExitCode rv_cpu_cycle_helper(rv_cpu *cpu, rv_memory mem, rv_instruction i
         // case SRA_opcode:
         // case OR_opcode:
         // case AND_opcode:
-            return execute_R_instruction(cpu, instr);
+            return execute_R_instruction(cpu, instr, /* move_pc */ 1);
         case ECALL_opcode:
             return execute_ecall(cpu, mem, instr);
     }
@@ -363,5 +370,19 @@ ExitCode rv_cpu_cycle(rv_cpu *cpu, rv_memory mem, rv_instruction instr) {
     cpu->x[0] = 0; // Note: paranoic :)
     ExitCode code = rv_cpu_cycle_helper(cpu, mem, instr);
     cpu->x[0] = 0;
+    return code;
+}
+
+ExitCode rv_cpu_interpret_memory(rv_cpu *cpu, rv_memory mem) {
+    ExitCode code;
+    do {
+        unsigned int instr_encoding = rv_memory_read_int(mem, cpu->pc);
+        // FIXME currently we save files in big endian, because its easier...
+        // Therefore, instructions in memory are big endian and we need byteswap instruction
+        // This should be fixed!!!
+        instr_encoding = __builtin_bswap32(instr_encoding);
+        rv_instruction instr = (rv_instruction) {.encoding = instr_encoding};
+        code = rv_cpu_cycle(cpu, mem, instr);
+    } while (code == OK);
     return code;
 }
