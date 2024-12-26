@@ -12,8 +12,8 @@ build_dir:
 
 build_objects: $(SRC)/*.c build_dir
 	mkdir -p $(BUILD_DIR)/lib
-	$(CC) -g -fwrapv -c $(SRC)/interpreter.c -o $(BUILD_DIR)/lib/interpreter.o
-	$(CC) -g -c $(SRC)/memory.c -o $(BUILD_DIR)/lib/memory.o
+	$(CC) -fwrapv -c $(SRC)/interpreter.c -o $(BUILD_DIR)/lib/interpreter.o
+	$(CC) -c $(SRC)/memory.c -o $(BUILD_DIR)/lib/memory.o
 	$(CC) -c $(SRC)/cpu.c -o $(BUILD_DIR)/lib/cpu.o
 
 main: build_objects
